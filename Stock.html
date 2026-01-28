@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion du Stock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .dark-mode .card,
+        .dark-mode .modal-content,
+        .dark-mode .nav-link {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+
+        .dark-mode input,
+        .dark-mode select,
+        .dark-mode textarea,
+        .dark-mode .search-box {
+            background: #1a202c;
+            color: #e2e8f0;
+            border-color: #4a5568;
+        }
+
+        .dark-mode h1,
+        .dark-mode h2,
+        .dark-mode label {
+            color: #e2e8f0;
+        }
+
+        .dark-mode .item,
+        .dark-mode .alert-item {
+            background: #1a202c;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .theme-toggle {
+            background: #ffd700;
+            color: #333;
+            cursor: pointer;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, button, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: auto;
+        }
+
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        .stock-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .stock-info.stock-alert {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: auto;
+        }
+
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);
+        }
+
+        .history-btn {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: auto;
+        }
+
+        .history-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(23, 162, 184, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+        }
+
+        .alert-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        .alert-box h3 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+
+        .alert-item {
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #17a2b8;
+        }
+
+        .history-date {
+            font-weight: 600;
+            color: #17a2b8;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .history-details {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .export-stock-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .import-stock-btn {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .item-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .item-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .modal-content {
+                padding: 20px;
+                width: 95%;
+            }
+
+            .nav-link {
+                display: block;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .nav-container {
+                flex-direction: column;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+            }
+
+            .modal-buttons button {
+                width: 100%;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-container">
+            <a href="./index.html" class="nav-link">← Retour à l'agenda</a>
+            <a href="./Statistiques.html" class="nav-link">📊 Statistiques</a>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙 Mode Sombre</button>
+        </div>
+        
+        <h1>📦 Gestion du Stock</h1>
+
+        <div id="alertBox"></div>
+
+        <div class="card">
+            <h2>Ajouter un article</h2>
+            <div class="form-group">
+                <label for="itemName">Nom de l'article</label>
+                <input type="text" id="itemName" placeholder="Ex: Poulet, Poisson, Dessert...">
+            </div>
+            <div class="form-group">
+                <label for="itemStock">Quantité en stock (optionnel)</label>
+                <input type="number" id="itemStock" placeholder="Ex: 50" min="0" step="0.1">
+                <small style="color: #666; font-size: 12px;">Laissez vide si vous ne souhaitez pas gérer les stocks pour cet article</small>
+            </div>
+            <div class="form-group">
+                <label for="itemAlert">Seuil d'alerte (optionnel)</label>
+                <input type="number" id="itemAlert" placeholder="Ex: 10" min="0" step="0.1">
+                <small style="color: #666; font-size: 12px;">Vous recevrez une alerte quand le stock descendra en dessous de ce seuil</small>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button onclick="addItem()" style="flex: 1;">➕ Ajouter l'article</button>
+                <button onclick="exportStock()" class="export-stock-btn" style="flex: 1;">📤 Exporter Stock</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Liste des articles</h2>
+            <input type="text" id="searchArticle" class="search-box" placeholder="🔍 Rechercher un article..." oninput="filterArticles()">
+            <div id="itemList"></div>
+        </div>
+    </div>
+
+    <!-- Modal pour modifier le stock -->
+    <div id="stockModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-header">Modifier le stock</h2>
+            <div class="form-group">
+                <label for="modalItemName">Article</label>
+                <input type="text" id="modalItemName" readonly style="background: #f0f0f0;">
+            </div>
+            <div class="form-group">
+                <label for="modalStock">Quantité en stock</label>
+                <input type="number" id="modalStock" step="0.1" min="0">
+            </div>
+            <div class="form-group">
+                <label for="modalAlert">Seuil d'alerte</label>
+                <input type="number" id="modalAlert" step="0.1" min="0">
+            </div>
+            <div class="modal-buttons">
+                <button onclick="saveStockUpdate()">✅ Enregistrer</button>
+                <button class="cancel-btn" onclick="closeStockModal()">❌ Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour historique des commandes -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-header">Historique des commandes</h2>
+            <div id="historyContent"></div>
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeHistoryModal()">❌ Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let items = JSON.parse(localStorage.getItem('items')) || [];
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+        let filteredItems = [...items];
+
+        function saveData() {
+            localStorage.setItem('items', JSON.stringify(items));
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.theme-toggle');
+            if (document.body.classList.contains('dark-mode')) {
+                btn.textContent = '☀️ Mode Clair';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                btn.textContent = '🌙 Mode Sombre';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Charger le thème sauvegardé
+        if (localStorage.getItem('theme') === 'dark') {
+            toggleTheme();
+        }
+
+        function filterArticles() {
+            const searchTerm = document.getElementById('searchArticle').value.toLowerCase();
+            filteredItems = items.filter(item => 
+                item.name.toLowerCase().includes(searchTerm)
+            );
+            renderItems();
+        }
+
+        function addItem() {
+            const name = document.getElementById('itemName').value.trim();
+            const stock = document.getElementById('itemStock').value.trim();
+            const alertThreshold = document.getElementById('itemAlert').value.trim();
+
+            if (!name) {
+                alert('Veuillez entrer un nom d\'article');
+                return;
+            }
+
+            const newItem = {
+                id: Date.now(),
+                name,
+                stock: stock ? parseFloat(stock) : null,
+                alertThreshold: alertThreshold ? parseFloat(alertThreshold) : null
+            };
+
+            items.push(newItem);
+
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemStock').value = '';
+            document.getElementById('itemAlert').value = '';
+            saveData();
+            filterArticles();
+            checkStockAlerts();
+        }
+
+        function deleteItem(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
+                items = items.filter(item => item.id !== id);
+                saveData();
+                filterArticles();
+                checkStockAlerts();
+            }
+        }
+
+        function renderItems() {
+            const list = document.getElementById('itemList');
+            
+            if (filteredItems.length === 0) {
+                list.innerHTML = '<div class="empty-state">Aucun article trouvé</div>';
+                return;
+            }
+
+            list.innerHTML = filteredItems.map(item => {
+                let stockDisplay = '';
+                let stockClass = '';
+                
+                if (item.stock !== null && item.stock !== undefined) {
+                    if (item.alertThreshold !== null && item.stock <= item.alertThreshold) {
+                        stockClass = 'stock-alert';
+                        stockDisplay = `<div class="stock-info ${stockClass}">⚠️ Stock: ${item.stock} (Alerte: ${item.alertThreshold})</div>`;
+                    } else {
+                        stockDisplay = `<div class="stock-info">📦 Stock: ${item.stock}${item.alertThreshold ? ` (Alerte: ${item.alertThreshold})` : ''}</div>`;
+                    }
+                }
+                
+                return `
+                <div class="item">
+                    <div class="item-header">
+                        <div style="flex: 1;">
+                            <div class="item-name">${item.name}</div>
+                            ${stockDisplay}
+                        </div>
+                        <div class="item-actions">
+                            <button class="history-btn" onclick="showItemHistory(${item.id})">📋 Historique</button>
+                            ${item.stock !== null ? `
+                                <button class="edit-btn" onclick="openStockModal(${item.id})">✏️ Modifier</button>
+                            ` : ''}
+                            <button class="delete-btn" onclick="deleteItem(${item.id})">🗑️ Supprimer</button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        let currentEditingItemId = null;
+
+        function openStockModal(itemId) {
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+
+            currentEditingItemId = itemId;
+            document.getElementById('modalItemName').value = item.name;
+            document.getElementById('modalStock').value = item.stock || 0;
+            document.getElementById('modalAlert').value = item.alertThreshold || '';
+            document.getElementById('stockModal').classList.add('show');
+        }
+
+        function closeStockModal() {
+            document.getElementById('stockModal').classList.remove('show');
+            currentEditingItemId = null;
+        }
+
+        function saveStockUpdate() {
+            if (!currentEditingItemId) return;
+
+            const item = items.find(i => i.id === currentEditingItemId);
+            if (!item) return;
+
+            item.stock = parseFloat(document.getElementById('modalStock').value) || 0;
+            item.alertThreshold = parseFloat(document.getElementById('modalAlert').value) || null;
+
+            saveData();
+            filterArticles();
+            checkStockAlerts();
+            closeStockModal();
+        }
+
+        function showItemHistory(itemId) {
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+
+            // Trouver toutes les commandes contenant cet article
+            const itemOrders = orders.filter(order => 
+                order.items.some(i => i.itemId === itemId)
+            ).sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+
+            const historyContent = document.getElementById('historyContent');
+            
+            if (itemOrders.length === 0) {
+                historyContent.innerHTML = `
+                    <p style="text-align: center; color: #999; padding: 20px;">
+                        Aucune commande trouvée pour <strong>${item.name}</strong>
+                    </p>
+                `;
+            } else {
+                let totalQty = 0;
+                const historyHTML = itemOrders.map(order => {
+                    const orderItem = order.items.find(i => i.itemId === itemId);
+                    totalQty += orderItem.qty;
+                    const qtyDisplay = orderItem.qtyType === 'nombre' 
+                        ? `${orderItem.qty} unité(s)`
+                        : `${orderItem.qty} kg`;
+                    
+                    return `
+                        <div class="history-item">
+                            <div class="history-date">📅 ${order.date} à ${order.time}</div>
+                            <div class="history-details">
+                                👤 <strong>${order.clientName}</strong><br>
+                                📦 Quantité: ${qtyDisplay}
+                                ${orderItem.comment ? `<br>💬 ${orderItem.comment}` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                historyContent.innerHTML = `
+                    <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <h3 style="color: #17a2b8; margin: 0;">📊 ${item.name}</h3>
+                        <p style="margin: 10px 0 0 0;">
+                            <strong>Total commandé:</strong> ${totalQty} unité(s)<br>
+                            <strong>Nombre de commandes:</strong> ${itemOrders.length}
+                        </p>
+                    </div>
+                    ${historyHTML}
+                `;
+            }
+
+            document.getElementById('historyModal').classList.add('show');
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.remove('show');
+        }
+
+        function checkStockAlerts() {
+            const alertBox = document.getElementById('alertBox');
+            const lowStockItems = items.filter(item => 
+                item.stock !== null && 
+                item.alertThreshold !== null && 
+                item.stock <= item.alertThreshold
+            );
+
+            if (lowStockItems.length > 0) {
+                alertBox.innerHTML = `
+                    <div class="alert-box">
+                        <h3>⚠️ Alertes de stock (${lowStockItems.length})</h3>
+                        ${lowStockItems.map(item => `
+                            <div class="alert-item">
+                                <strong>${item.name}</strong>: ${item.stock} restant(s) 
+                                (seuil d'alerte: ${item.alertThreshold})
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                alertBox.innerHTML = '';
+            }
+        }
+
+        function exportStock() {
+            let csv = 'Article,Stock,Seuil Alerte\n';
+            
+            items.forEach(item => {
+                const stock = item.stock !== null ? item.stock : 'Non géré';
+                const alert = item.alertThreshold !== null ? item.alertThreshold : 'Non défini';
+                csv += `"${item.name}",${stock},${alert}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `stock_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Vérifier les alertes au chargement de la page
+        filterArticles();
+        checkStockAlerts();
+    </script>
+</body>
+</html>

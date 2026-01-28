@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue Liste - Commandes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-link {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            margin-right: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .order-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .order-card:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .order-info {
+            flex: 1;
+        }
+
+        .order-date {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .order-client {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .order-items {
+            margin: 10px 0;
+        }
+
+        .order-item {
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .order-comment {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 6px;
+            font-style: italic;
+            font-size: 13px;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: white;
+        }
+
+        .btn-duplicate {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 60px 20px;
+            font-style: italic;
+            font-size: 1.1em;
+        }
+
+        .stats-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .sort-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .sort-btn {
+            padding: 10px 20px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .sort-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .sort-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .nav-link {
+                display: block;
+                text-align: center;
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .order-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+            }
+
+            .sort-options {
+                flex-direction: column;
+            }
+
+            .sort-btn {
+                width: 100%;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .filters {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Badge de statut */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-today {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-upcoming {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .status-past {
+            background: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="./index.html" class="nav-link">📅 Vue Calendrier</a>
+        <a href="./Stock.html" class="nav-link">📦 Gérer le stock</a>
+        <a href="./statistiques.html" class="nav-link">📊 Statistiques</a>
+        
+        <h1>📋 Vue Liste - Toutes les Commandes</h1>
+
+        <!-- Statistics bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="totalOrders">0</div>
+                <div class="stat-label">Commandes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="todayOrders">0</div>
+                <div class="stat-label">Aujourd'hui</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="upcomingOrders">0</div>
+                <div class="stat-label">À venir</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card">
+            <h2>🔍 Filtres</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="filterClient">Client</label>
+                    <input type="text" id="filterClient" placeholder="Nom du client..." oninput="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label for="filterArticle">Article</label>
+                    <input type="text" id="filterArticle" placeholder="Nom de l'article..." oninput="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label for="filterDateStart">Date de début</label>
+                    <input type="date" id="filterDateStart" onchange="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label for="filterDateEnd">Date de fin</label>
+                    <input type="date" id="filterDateEnd" onchange="applyFilters()">
+                </div>
+            </div>
+            <div class="sort-options">
+                <button class="sort-btn active" onclick="setSortOrder('date-asc')">📅 Date (croissant)</button>
+                <button class="sort-btn" onclick="setSortOrder('date-desc')">📅 Date (décroissant)</button>
+                <button class="sort-btn" onclick="setSortOrder('client')">👤 Client (A-Z)</button>
+            </div>
+        </div>
+
+        <!-- Orders list -->
+        <div class="card">
+            <h2>📦 Commandes (<span id="orderCount">0</span>)</h2>
+            <div id="ordersList"></div>
+        </div>
+    </div>
+
+    <script>
+        let items = JSON.parse(localStorage.getItem('items')) || [];
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+        let filteredOrders = [...orders];
+        let currentSort = 'date-asc';
+
+        function applyFilters() {
+            const clientFilter = document.getElementById('filterClient').value.toLowerCase();
+            const articleFilter = document.getElementById('filterArticle').value.toLowerCase();
+            const dateStart = document.getElementById('filterDateStart').value;
+            const dateEnd = document.getElementById('filterDateEnd').value;
+
+            filteredOrders = orders.filter(order => {
+                // Client filter
+                if (clientFilter && !order.clientName.toLowerCase().includes(clientFilter)) {
+                    return false;
+                }
+
+                // Article filter
+                if (articleFilter) {
+                    const hasArticle = order.items.some(item => 
+                        item.itemName.toLowerCase().includes(articleFilter)
+                    );
+                    if (!hasArticle) return false;
+                }
+
+                // Date filters
+                if (dateStart && order.date < dateStart) return false;
+                if (dateEnd && order.date > dateEnd) return false;
+
+                return true;
+            });
+
+            sortOrders();
+            renderOrders();
+            updateStats();
+        }
+
+        function setSortOrder(sort) {
+            currentSort = sort;
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            sortOrders();
+            renderOrders();
+        }
+
+        function sortOrders() {
+            if (currentSort === 'date-asc') {
+                filteredOrders.sort((a, b) => {
+                    const dateCompare = new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time);
+                    return dateCompare;
+                });
+            } else if (currentSort === 'date-desc') {
+                filteredOrders.sort((a, b) => {
+                    const dateCompare = new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time);
+                    return dateCompare;
+                });
+            } else if (currentSort === 'client') {
+                filteredOrders.sort((a, b) => a.clientName.localeCompare(b.clientName));
+            }
+        }
+
+        function getOrderStatus(orderDate) {
+            const today = new Date().toISOString().split('T')[0];
+            if (orderDate === today) {
+                return { class: 'status-today', label: 'Aujourd\'hui' };
+            } else if (orderDate > today) {
+                return { class: 'status-upcoming', label: 'À venir' };
+            } else {
+                return { class: 'status-past', label: 'Passée' };
+            }
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('ordersList');
+            document.getElementById('orderCount').textContent = filteredOrders.length;
+
+            if (filteredOrders.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucune commande trouvée avec ces filtres</div>';
+                return;
+            }
+
+            container.innerHTML = filteredOrders.map(order => {
+                const status = getOrderStatus(order.date);
+                const dateObj = new Date(order.date);
+                const formattedDate = dateObj.toLocaleDateString('fr-FR', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+
+                const itemsList = order.items.map(item => {
+                    const qtyDisplay = item.qtyType === 'nombre' 
+                        ? `${item.qty} unité(s)`
+                        : `${item.qty} kg`;
+                    return `
+                        <div class="order-item">
+                            <strong>${item.itemName}</strong> - ${qtyDisplay}
+                            ${item.comment ? `<div style="color: #999; font-size: 11px; margin-top: 3px;">💬 ${item.comment}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <div class="order-date">
+                                    📅 ${formattedDate} à ${order.time}
+                                    <span class="status-badge ${status.class}">${status.label}</span>
+                                </div>
+                                <div class="order-client">👤 ${order.clientName}</div>
+                            </div>
+                            <div class="order-actions">
+                                <button class="btn btn-duplicate" onclick="duplicateOrder(${order.id})" title="Dupliquer">
+                                    📋 Dupliquer
+                                </button>
+                                <button class="btn btn-delete" onclick="deleteOrder(${order.id})" title="Supprimer">
+                                    🗑️ Supprimer
+                                </button>
+                            </div>
+                        </div>
+                        <div class="order-items">
+                            ${itemsList}
+                        </div>
+                        ${order.comment ? `<div class="order-comment">💬 ${order.comment}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            document.getElementById('totalOrders').textContent = orders.length;
+            
+            const todayOrders = orders.filter(o => o.date === today).length;
+            document.getElementById('todayOrders').textContent = todayOrders;
+            
+            const upcomingOrders = orders.filter(o => o.date > today).length;
+            document.getElementById('upcomingOrders').textContent = upcomingOrders;
+        }
+
+        function duplicateOrder(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            if (!confirm(`Voulez-vous dupliquer la commande de ${order.clientName} ?`)) {
+                return;
+            }
+
+            // Créer une copie avec nouvelle date/heure
+            const newOrder = {
+                ...order,
+                id: Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                time: '12:00',
+                items: [...order.items]
+            };
+
+            orders.push(newOrder);
+            orders.sort((a, b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+            
+            localStorage.setItem('orders', JSON.stringify(orders));
+            
+            alert('Commande dupliquée avec succès! Date: aujourd\'hui à 12:00');
+            applyFilters();
+        }
+
+        function deleteOrder(orderId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+                return;
+            }
+
+            const order = orders.find(o => o.id === orderId);
+            
+            // Remettre le stock
+            if (order) {
+                for (let orderItem of order.items) {
+                    const item = items.find(i => i.id === orderItem.itemId);
+                    if (item && item.stock !== null && item.stock !== undefined) {
+                        item.stock = item.stock + orderItem.qty;
+                    }
+                }
+                localStorage.setItem('items', JSON.stringify(items));
+            }
+
+            orders = orders.filter(o => o.id !== orderId);
+            localStorage.setItem('orders', JSON.stringify(orders));
+            
+            applyFilters();
+        }
+
+        // Initialize
+        applyFilters();
+    </script>
+</body>
+</html>
